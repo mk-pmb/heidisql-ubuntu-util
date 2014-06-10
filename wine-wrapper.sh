@@ -5,8 +5,14 @@ SELFPATH="$(readlink -m "$0"/..)"
 
 function main () {
   # cd "$SELFPATH" || return $?
-  wine "$SELFPATH"/portable/heidisql.exe 2>&1 | winecalm \
-    >"$SELFPATH"/wine-err.log
+
+  local WINE_ERRMSG_FILTER="$(which \
+    winecalm \
+    2>/dev/null | tail -n 1)"
+  [ -x "$WINE_ERRMSG_FILTER" ] || WINE_ERRMSG_FILTER='cat'
+
+  wine "$SELFPATH"/portable/heidisql.exe 2>&1 | "$WINE_ERRMSG_FILTER" \
+    >"$SELFPATH"/wine-err.log &
   return 0
 }
 
